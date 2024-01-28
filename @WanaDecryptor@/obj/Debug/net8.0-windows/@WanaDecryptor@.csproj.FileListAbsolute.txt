@@ -1,0 +1,17 @@
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\bin\Debug\net8.0-windows\@WanaDecryptor@.exe
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\bin\Debug\net8.0-windows\@WanaDecryptor@.deps.json
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\bin\Debug\net8.0-windows\@WanaDecryptor@.runtimeconfig.json
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\bin\Debug\net8.0-windows\@WanaDecryptor@.dll
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\bin\Debug\net8.0-windows\@WanaDecryptor@.pdb
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\_WanaDecryptor_.Form1.resources
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.csproj.GenerateResource.cache
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.AssemblyInfoInputs.cache
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.AssemblyInfo.cs
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.csproj.CoreCompileInputs.cache
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.dll
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\refint\@WanaDecryptor@.dll
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.pdb
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\@WanaDecryptor@.genruntimeconfig.cache
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\ref\@WanaDecryptor@.dll
+C:\Users\jzakr\Desktop\Pliki\Visual Studio Projects\@WanaDecryptor@\obj\Debug\net8.0-windows\_WanaDecryptor_.Properties.Resources.resources
